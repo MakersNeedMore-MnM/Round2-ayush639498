@@ -3,19 +3,10 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const { dbIsConnected } = require('../config/db');
 const { DEMO_USERS } = require('../utils/demoAuth');
-const { JWT_SECRET, SESSION_COOKIE } = require('../middleware/auth');
-const { issueCsrfToken } = require('../middleware/security');
+const { JWT_SECRET } = require('../middleware/auth');
 
 const sign = id => jwt.sign({ id }, JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
 const clean = u => { const x = u.toObject ? u.toObject() : { ...u }; delete x.password; return x; };
-const cookieOpts = () => ({
-  httpOnly: true,
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  secure: process.env.NODE_ENV === 'production',
-  maxAge: 12 * 60 * 60 * 1000, // 12h — a disaster-response shift window, re-select after that
-  path: '/'
-});
-
 async function login(req, res) {
   const email = (req.body.email || '').toLowerCase();
   const pass = req.body.password || '';
@@ -53,19 +44,13 @@ async function selectRole(req, res) {
     language: req.body.language || 'en'
   };
   const token = jwt.sign({ user }, JWT_SECRET, { expiresIn: '12h' });
-  res.cookie(SESSION_COOKIE, token, cookieOpts());
-  res.json({ success: true, user });
-}
-
-function csrf(req, res) {
-  res.json({ success: true, csrfToken: issueCsrfToken(req, res) });
+  res.json({ success: true, token, user });
 }
 
 function logout(req, res) {
-  res.clearCookie(SESSION_COOKIE, { path: '/' });
   res.json({ success: true });
 }
 
 const me = (req, res) => res.json({ success: true, user: req.user });
 
-module.exports = { login, register, selectRole, logout, me, csrf };
+module.exports = { login, register, selectRole, logout, me };

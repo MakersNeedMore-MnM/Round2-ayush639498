@@ -3,29 +3,13 @@ import axios from 'axios';
 export const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const BASE = API.replace(/\/api\/?$/, '');
 
-let csrfToken = null;
-
-async function getCsrfToken() {
-  if (csrfToken) return csrfToken;
-  const res = await axios.get(`${API}/auth/csrf`, { withCredentials: true });
-  csrfToken = res.data?.csrfToken || null;
-  return csrfToken;
-}
-
 export async function api(path, opt = {}) {
-  const method = String(opt.method || 'get').toUpperCase();
-  let csrf = null;
-  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
-    csrf = await getCsrfToken();
-  }
   const token = localStorage.getItem('token');
   return axios({
     url: API + path,
-    withCredentials: true,
     ...opt,
     headers: {
       ...(opt.headers || {}),
-      ...(csrf ? { 'X-CSRF-Token': csrf } : {}),
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
   });

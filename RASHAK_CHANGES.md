@@ -80,3 +80,7 @@ Resident evacuation now shows the assigned shelter route, evacuation progress an
 Admin evacuation now separates operation creation from actual shelter occupancy. Teams can be assigned to an evacuation, response units become en route, movement progress can be recorded, shelter occupancy increases only when people are actually moved, and completed operations release the assigned teams.
 
 Administration now includes dedicated Rescue Operations, Rescue Tracking, Road Network and Emergency Contacts pages. Page headers were simplified and landing feature cards were reduced to essential labels.
+
+
+### Authentication deployment fix
+The web client now uses bearer JWT authentication for role selection, REST API calls, and Socket.IO. This removes the cross site cookie and CSRF dependency between a Vercel frontend and Render backend. The role endpoint returns a signed token, the frontend stores it locally for the current session, and Socket.IO authenticates with the same token.

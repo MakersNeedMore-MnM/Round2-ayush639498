@@ -15,27 +15,21 @@ const SESSION_COOKIE = 'rashak_session';
 // sending a header or a body field — those are ignored for authorization.
 async function protect(req, res, next) {
   try {
-    // 1) Registered account via Bearer token (email/password flow, still supported)
     const header = req.headers.authorization;
     if (header?.startsWith('Bearer ')) {
-      const decoded = jwt.verify(header.split(' ')[1], EFFECTIVE_JWT_SECRET);
+      const decoded = jwt.verify(header.slice(7), EFFECTIVE_JWT_SECRET);
       let user = null;
-      if (dbIsConnected()) user = await User.findById(decoded.id).select('-password');
-      if (!user) user = DEMO_USERS.find(u => u.id === decoded.id || u._id === decoded.id);
+      if (decoded.user?.role) {
+        user = decoded.user;
+      } else if (dbIsConnected() && decoded.id) {
+        user = await User.findById(decoded.id).select('-password');
+      }
+      if (!user && decoded.id) user = DEMO_USERS.find(x => x.id === decoded.id || x._id === decoded.id);
       if (!user) return res.status(401).json({ success: false, message: 'User not found' });
       req.user = user;
       return next();
     }
-    // 2) Server-issued role session cookie (resident / admin quick entry, no password)
-    const cookieToken = req.cookies?.[SESSION_COOKIE];
-    if (cookieToken) {
-      const decoded = jwt.verify(cookieToken, EFFECTIVE_JWT_SECRET);
-      req.user = decoded.user;
-      return next();
-    }
     if (process.env.DEMO_BYPASS_AUTH === 'true' && process.env.NODE_ENV !== 'production') {
-      // Local development convenience only — never active in production, and
-      // never selectable by a deployed client since NODE_ENV gates it too.
       const demo = DEMO_USERS.find(u => u.role === 'DISTRICT_OFFICER') || DEMO_USERS[1];
       req.user = { ...demo };
       return next();
@@ -45,8 +39,7 @@ async function protect(req, res, next) {
     return res.status(401).json({ success: false, message: 'Invalid or expired session' });
   }
 }
-
 const permit = (...roles) => (req, res, next) =>
   roles.includes(req.user?.role) ? next() : res.status(403).json({ success: false, message: 'Insufficient permissions' });
 
-module.exports = { protect, permit, JWT_SECRET: EFFECTIVE_JWT_SECRET, SESSION_COOKIE };
+module.exports = { protect, permit, JWT_SECRET: EFFECTIVE_JWT_SECRET };

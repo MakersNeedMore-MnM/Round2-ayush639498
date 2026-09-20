@@ -46,12 +46,14 @@ export function AuthProvider(props) {
 
   const selectRole = useCallback(async function selectRole(role, accessCode, language) {
     const res = await api('/auth/role', { method: 'post', data: { role, accessCode, language } });
+    localStorage.setItem('token', res.data.token);
     setUser(res.data.user);
     return res.data.user;
   }, []);
 
   const logout = useCallback(async function logout() {
     try { await api('/auth/logout', { method: 'post' }); } catch (e) { /* ignore */ }
+    localStorage.removeItem('token');
     setUser(null);
   }, []);
 
@@ -105,7 +107,7 @@ export function DataProvider(props) {
 
   useEffect(function connectSocket() {
     if (!auth.user) return;
-    const socket = io(BASE, { withCredentials: true });
+    const socket = io(BASE, { auth: { token: localStorage.getItem('token') || '' } });
     socket.on('connect', function onConnect() { setConnected(true); });
     socket.on('disconnect', function onDisconnect() { setConnected(false); });
     const events = ['incidents:updated', 'incident:new', 'incident:assigned', 'resources:updated', 'resource:dispatched', 'shelters:updated', 'shelter:updated', 'alerts:updated', 'roads:updated', 'road:blocked', 'road:cleared', 'evacuations:updated', 'evacuation:updated', 'meshnodes:updated'];

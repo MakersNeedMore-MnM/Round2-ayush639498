@@ -3,7 +3,6 @@ const express = require('express');
 const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
-const cookieParser = require('cookie-parser');
 const rateLimit = require('express-rate-limit');
 const mongoSanitize = require('express-mongo-sanitize');
 const hpp = require('hpp');
@@ -11,7 +10,7 @@ const cron = require('node-cron');
 const { Server } = require('socket.io');
 const { connectDB, dbIsConnected } = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
-const { sanitizeInput, csrfProtect, auditLog } = require('./middleware/security');
+const { sanitizeInput, auditLog } = require('./middleware/security');
 const { protect, permit, JWT_SECRET } = require('./middleware/auth');
 const jwt = require('jsonwebtoken');
 const auth = require('./routes/authRoutes');
@@ -55,7 +54,6 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
 }));
 app.use(express.json({ limit: '1mb' }));
-app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(hpp());
 app.use(sanitizeInput);
@@ -66,7 +64,6 @@ app.use(rateLimit({ windowMs: 60000, max: 300, standardHeaders: true, legacyHead
 const sosLimiter = rateLimit({ windowMs: 60000, max: 12, standardHeaders: true, legacyHeaders: false, message: { success: false, message: 'Too many reports from this connection, please wait a moment' } });
 
 app.use((req, res, next) => { req.io = io; next(); });
-app.use(csrfProtect);
 app.use('/api', auditLog);
 
 app.get('/api/health', (req, res) => res.json({ success: true, service: 'Rashak', status: 'operational' }));
@@ -91,10 +88,9 @@ app.post('/api/scraper/preview', protect, permit('ADMIN'), async (req, res) => {
 
 io.use((socket, next) => {
   try {
-    const cookieHeader = socket.handshake.headers.cookie || '';
-    const match = cookieHeader.match(/(?:^|;\s*)rashak_session=([^;]+)/);
-    if (!match) return next(new Error('Authentication required'));
-    const decoded = jwt.verify(decodeURIComponent(match[1]), JWT_SECRET);
+    const token = socket.handshake.auth?.token;
+    if (!token) return next(new Error('Authentication required'));
+    const decoded = jwt.verify(token, JWT_SECRET);
     socket.user = decoded.user || null;
     if (!socket.user?.role) return next(new Error('Invalid session'));
     next();

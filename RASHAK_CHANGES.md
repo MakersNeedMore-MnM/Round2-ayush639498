@@ -27,7 +27,7 @@
   UI toggle.
 - Added: strict CORS allow-list with credentials, Helmet CSP, Mongo operator
   sanitization, HTTP parameter pollution protection, a custom recursive input
-  sanitizer, double-submit-cookie CSRF protection on all state-changing
+  sanitizer on all state-changing
   requests, tiered rate limiting (tighter on `/auth` and SOS intake),
   structured audit logging on every non-GET request, and the previously open
   `/scraper/preview` diagnostic endpoint locked to authenticated admins only.
@@ -83,4 +83,4 @@ Administration now includes dedicated Rescue Operations, Rescue Tracking, Road N
 
 
 ### Authentication deployment fix
-The web client now uses bearer JWT authentication for role selection, REST API calls, and Socket.IO. This removes the cross site cookie and CSRF dependency between a Vercel frontend and Render backend. The role endpoint returns a signed token, the frontend stores it locally for the current session, and Socket.IO authenticates with the same token.
+The web client now uses bearer JWT authentication for role selection, REST API calls, and Socket.IO. This removes the cross site cookie dependency between a Vercel frontend and Render backend. The role endpoint returns a signed token, the frontend stores it locally for the current session, and Socket.IO authenticates with the same token.

@@ -6,13 +6,9 @@ const { DEMO_USERS } = require('../utils/demoAuth');
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET && process.env.NODE_ENV === 'production') throw new Error('JWT_SECRET is required in production');
 const EFFECTIVE_JWT_SECRET = JWT_SECRET || 'development-only-rashak-secret';
-const SESSION_COOKIE = 'rashak_session';
-
-// The role a request is treated as is decided ONLY by what the server itself
-// issued: either a signed httpOnly session cookie (set after the resident/admin
-// role selection flow, see authController.selectRole) or a verified JWT bearer
-// token for a registered account. A client can never assert its own role by
-// sending a header or a body field — those are ignored for authorization.
+// The role a request is treated as is decided only by what the server itself
+// issued: a verified JWT bearer token for the registered account or role selection
+// flow. A client cannot assert its own role by sending a body field or role header.
 async function protect(req, res, next) {
   try {
     const header = req.headers.authorization;

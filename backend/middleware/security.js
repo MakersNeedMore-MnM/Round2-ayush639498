@@ -1,5 +1,3 @@
-const crypto = require('crypto');
-
 // Recursively strip HTML/script content and dangerous Mongo operator keys from any
 // user supplied value. Runs on body, query and params. This is a defense-in-depth
 // layer in addition to express-mongo-sanitize (Mongo operator injection) and
@@ -36,36 +34,7 @@ function sanitizeInput(req, res, next) {
   next();
 }
 
-// Double submit cookie CSRF protection. A random token is issued as a readable
-// (non httpOnly) cookie; the frontend must echo it back in the X-CSRF-Token
-// header on every state changing request. An attacker on another origin can
-// trigger the request but cannot read the cookie to copy it into the header.
-const CSRF_COOKIE = 'rashak_csrf';
-function issueCsrfToken(req, res) {
-  let token = req.cookies?.[CSRF_COOKIE];
-  if (!token) {
-    token = crypto.randomBytes(24).toString('hex');
-    res.cookie(CSRF_COOKIE, token, {
-      httpOnly: false,
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 12 * 60 * 60 * 1000
-    });
-  }
-  return token;
-}
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
-function csrfProtect(req, res, next) {
-  issueCsrfToken(req, res);
-  if (SAFE_METHODS.has(req.method)) return next();
-  if (process.env.CSRF_PROTECTION === 'false') return next(); // explicit opt-out only, never default
-  const cookieToken = req.cookies?.[CSRF_COOKIE];
-  const headerToken = req.headers['x-csrf-token'];
-  if (!cookieToken || !headerToken || cookieToken !== headerToken) {
-    return res.status(403).json({ success: false, message: 'Invalid or missing CSRF token' });
-  }
-  next();
-}
 
 // Audit-friendly structured logging for every state changing / privileged request.
 // Never logs request bodies (may contain personal/location data) — only actor,
@@ -89,4 +58,4 @@ function auditLog(req, res, next) {
   next();
 }
 
-module.exports = { sanitizeInput, csrfProtect, issueCsrfToken, auditLog };
+module.exports = { sanitizeInput, auditLog };

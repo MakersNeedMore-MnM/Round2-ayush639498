@@ -28,7 +28,7 @@ async function register(req, res) {
 }
 
 // Prototype resident / admin quick entry. The selected role is signed by the server
-// into an httpOnly session cookie and is never trusted from the client afterward.
+// into a short lived JWT returned to the client. The server verifies that JWT on protected requests.
 const ROLE_MAP = { RESIDENT: 'CITIZEN', ADMIN: 'ADMIN' };
 async function selectRole(req, res) {
   const requested = String(req.body.role || '').toUpperCase();

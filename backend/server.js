@@ -22,14 +22,13 @@ const { scrape } = require('./services/scraperService');
 const { ensureDemoDatabase } = require('./services/demoSyncService');
 const presenceService = require('./services/presenceService');
 
-// Strict CORS allow list — a comma separated list of exact origins, never a
-// wildcard, since the API is served with credentials (cookies).
+// Strict CORS allow list — a comma separated list of exact frontend origins.
 const allowedOrigins = (process.env.CLIENT_URL || 'http://localhost:5173')
   .split(',').map(o => o.trim().replace(/\/$/, '')).filter(Boolean);
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: allowedOrigins, credentials: true, methods: ['GET', 'POST', 'PATCH'] } });
+const io = new Server(server, { cors: { origin: allowedOrigins, methods: ['GET', 'POST', 'PATCH'] } });
 
 app.set('trust proxy', 1); // needed for correct client IP behind Render/other proxies (rate limiting, audit log)
 
@@ -49,9 +48,8 @@ app.use(helmet({
 }));
 app.use(cors({
   origin: (origin, cb) => (!origin || allowedOrigins.includes(origin)) ? cb(null, true) : cb(new Error('Not allowed by CORS')),
-  credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json({ limit: '1mb' }));
 app.use(mongoSanitize());

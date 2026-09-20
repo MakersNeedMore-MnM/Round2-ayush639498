@@ -1,3 +1,5 @@
+live:rakshakkk.vercel.app
+
 # Rashak
 
 Rashak is a real time flood response and emergency coordination platform built for residents and district administrators. It connects public safety information with operational response tools so people can find help quickly while response teams can coordinate incidents, shelters, evacuations and rescue activity from one system.

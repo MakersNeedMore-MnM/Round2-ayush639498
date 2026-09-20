@@ -1,122 +1,70 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider, AuthProvider, DataProvider, useAuth } from './context/AppProviders';
+import { DashboardLayout } from './components/layout';
+import Landing from './pages/Landing';
+import Overview from './pages/dashboard/Overview';
+import LiveMap from './pages/dashboard/LiveMap';
+import Alerts from './pages/dashboard/Alerts';
+import SOS from './pages/dashboard/SOS';
+import Shelters from './pages/dashboard/Shelters';
+import Evacuation from './pages/dashboard/Evacuation';
+import LocalMesh from './pages/dashboard/LocalMesh';
+import Incidents from './pages/dashboard/Incidents';
+import Notifications from './pages/dashboard/Notifications';
+import Settings from './pages/dashboard/Settings';
+import RescueOperations from './pages/dashboard/RescueOperations';
+import RescueTracking from './pages/dashboard/RescueTracking';
+import RoadNetwork from './pages/dashboard/RoadNetwork';
+import EmergencyContacts from './pages/dashboard/EmergencyContacts';
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+function ProtectedArea(props) {
+  const auth = useAuth();
+  if (auth.checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white dark:bg-navy-950">
+        <p className="text-sm font-bold uppercase tracking-wide text-navy-500 dark:text-navy-300">Loading Rashak</p>
+      </div>
+    );
+  }
+  if (!auth.user) return <Navigate to="/" replace />;
+  return <DataProvider>{props.children}</DataProvider>;
 }
 
-export default App
+
+function RoleGate({ children, roles }) {
+  const auth = useAuth();
+  if (!roles.includes(auth.user?.role)) return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/dashboard" element={<ProtectedArea><DashboardLayout /></ProtectedArea>}>
+              <Route index element={<Overview />} />
+              <Route path="map" element={<LiveMap />} />
+              <Route path="alerts" element={<Alerts />} />
+              <Route path="sos" element={<SOS />} />
+              <Route path="shelters" element={<Shelters />} />
+              <Route path="evacuation" element={<Evacuation />} />
+              <Route path="mesh" element={<LocalMesh />} />
+              <Route path="incidents" element={<Incidents />} />
+              <Route path="notifications" element={<Notifications />} />
+              <Route path="rescue-operations" element={<RoleGate roles={['ADMIN','DISTRICT_OFFICER']}><RescueOperations /></RoleGate>} />
+              <Route path="rescue-tracking" element={<RoleGate roles={['ADMIN','DISTRICT_OFFICER']}><RescueTracking /></RoleGate>} />
+              <Route path="road-network" element={<RoleGate roles={['ADMIN','DISTRICT_OFFICER']}><RoadNetwork /></RoleGate>} />
+              <Route path="emergency-contacts" element={<EmergencyContacts />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}

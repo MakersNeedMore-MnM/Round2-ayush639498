@@ -1,0 +1,1 @@
+const m=require('mongoose');const s=new m.Schema({category:String,name:String,phone:String,district:String,state:String,isDemo:Boolean,sourceType:String,sourceName:String,sourceUrl:String},{timestamps:true});module.exports=m.model('EmergencyContact',s);

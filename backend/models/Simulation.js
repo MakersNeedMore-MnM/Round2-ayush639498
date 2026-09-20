@@ -1,0 +1,1 @@
+const m=require('mongoose');module.exports=m.model('Simulation',new m.Schema({scenario:String,district:String,beforeState:m.Schema.Types.Mixed,afterState:m.Schema.Types.Mixed,runBy:String},{timestamps:true}));

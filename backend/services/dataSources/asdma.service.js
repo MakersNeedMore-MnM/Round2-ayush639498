@@ -1,0 +1,5 @@
+const axios=require('axios');const cheerio=require('cheerio');
+const SOURCES=[{name:'ASDMA Flood Report',url:'https://asdma.assam.gov.in/information-services/assam-flood-report'},{name:'Assam Water Resources Daily Flood Bulletin',url:'https://waterresources.assam.gov.in/'}];
+async function fetchPage(src){try{const {data}=await axios.get(src.url,{timeout:8000,headers:{'User-Agent':'FloodGuard/2.0 public-data-monitor'}});const $=cheerio.load(data);const links=[];$('a').each((_,a)=>{const text=$(a).text().replace(/\s+/g,' ').trim(),href=$(a).attr('href');if(text&&href&&(text.toLowerCase().includes('flood')||text.toLowerCase().includes('daily')||href.toLowerCase().includes('.pdf')))links.push({text,href:new URL(href,src.url).href})});return {sourceType:'OFFICIAL',sourceName:src.name,sourceUrl:src.url,links:links.slice(0,20),pageText:$('body').text().replace(/\s+/g,' ').trim().slice(0,4000),fetchedAt:new Date()}}catch(e){return null}}
+async function fetchSources(){return (await Promise.all(SOURCES.map(fetchPage))).filter(Boolean)}
+module.exports={fetchSources,SOURCES};

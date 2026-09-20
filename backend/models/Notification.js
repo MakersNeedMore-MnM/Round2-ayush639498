@@ -1,0 +1,1 @@
+const m=require('mongoose');module.exports=m.model('Notification',new m.Schema({type:String,title:String,message:String,severity:{type:String,default:'info'},district:String,read:Boolean,meta:m.Schema.Types.Mixed},{timestamps:true}));

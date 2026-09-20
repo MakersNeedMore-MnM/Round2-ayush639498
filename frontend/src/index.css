@@ -1,111 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  font-family: Manrope, Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  --surface: #f5f7fa;
+  --panel: #ffffff;
+  --ink: #081a2f;
+  --muted: #607087;
+  --line: #dbe2ea;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+.dark {
+  color-scheme: dark;
+  --surface: #071321;
+  --panel: #0b1d31;
+  --ink: #f7fafc;
+  --muted: #9aabc0;
+  --line: #1d3148;
 }
 
+html, body, #root { min-height: 100%; }
 body {
   margin: 0;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: inherit;
+  letter-spacing: -0.012em;
+  /* Guards against any stray horizontal scroll on small screens, most
+     commonly caused by a map tile layer sizing itself before its parent
+     has settled during the sidebar's open/close transition. */
+  overflow-x: hidden;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+/* Leaflet's own panes and zoom controls default to a z-index as high as
+   1000, which is higher than the app's mobile sidebar drawer (z-50) and its
+   backdrop (z-40). That let the map render visually on top of the open
+   sidebar on phones. Capping it here keeps every map strictly behind the
+   app's navigation chrome, while still letting it stack above ordinary
+   page content. */
+/* Keep maps inside their own stacking context. The mobile navigation drawer
+   must always sit above Leaflet, including while the drawer is animating. */
+.leaflet-container {
+  position: relative !important;
+  z-index: 0 !important;
+  isolation: isolate;
+}
+.leaflet-pane, .leaflet-top, .leaflet-bottom, .leaflet-control-container {
+  z-index: 1 !important;
+}
+button, input, textarea, select { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible {
+  outline: 2px solid #1a4a8c;
+  outline-offset: 2px;
+}
+* { scrollbar-width: thin; scrollbar-color: #9aaabd transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #a9b5c4; border-radius: 2px; }
+.dark ::-webkit-scrollbar-thumb { background: #30465e; }
+
+.leaflet-container {
+  background: #e8edf2;
+  font-family: inherit;
+}
+.dark .leaflet-container { background: #0a1a2b; }
+.leaflet-popup-content-wrapper {
+  border-radius: 4px !important;
+  box-shadow: 0 10px 28px rgba(5, 15, 30, .18) !important;
+}
+.leaflet-popup-tip { border-radius: 0 !important; }
+.leaflet-control-zoom a { border-radius: 2px !important; }
+
+.rashak-map-grid {
+  background-image:
+    linear-gradient(rgba(16, 42, 67, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(16, 42, 67, .045) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.dark .rashak-map-grid {
+  background-image:
+    linear-gradient(rgba(170, 195, 220, .035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(170, 195, 220, .035) 1px, transparent 1px);
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
+@keyframes rashak-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(179,38,30,.42); }
+  100% { box-shadow: 0 0 0 13px rgba(179,38,30,0); }
 }
+.rashak-pulse-marker { animation: rashak-pulse 1.8s ease-out infinite; }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
+@media print { .no-print { display: none !important; } }

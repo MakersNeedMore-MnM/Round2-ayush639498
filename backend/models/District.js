@@ -1,0 +1,1 @@
+const m=require('mongoose');const s=new m.Schema({name:String,state:String,country:{type:String,default:'India'},center:{lat:Number,lng:Number},zones:[String],population:Number,isActive:{type:Boolean,default:true},rivers:[String],cwcSites:[String],imdId:Number},{timestamps:true});s.index({state:1,name:1},{unique:true});module.exports=m.model('District',s);

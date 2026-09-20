@@ -1,0 +1,1 @@
+const m=require('mongoose');const s=new m.Schema({name:String,district:String,state:String,severity:{type:String,default:'HIGH'},geometry:{type:{type:String,default:'Polygon'},coordinates:Array},sourceType:{type:String,default:'DEMO'},sourceName:String,sourceUrl:String},{timestamps:true});s.index({district:1});module.exports=m.model('FloodZone',s);

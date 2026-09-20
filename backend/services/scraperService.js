@@ -1,0 +1,1 @@
+const axios=require('axios');const cheerio=require('cheerio');async function scrape(url){try{const {data}=await axios.get(url,{timeout:7000,headers:{'User-Agent':'FloodGuard-Demo/1.0'}});const $=cheerio.load(data);return $('body').text().replace(/\s+/g,' ').trim().slice(0,5000)}catch(e){return null}}module.exports={scrape};

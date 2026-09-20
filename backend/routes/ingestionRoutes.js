@@ -1,0 +1,1 @@
+const r=require('express').Router(),{protect,permit}=require('../middleware/auth'),{refreshAll}=require('../services/ingestionService');r.use(protect,permit('ADMIN','DISTRICT_OFFICER'));r.post('/refresh',async(req,res)=>res.json({success:true,data:await refreshAll()}));module.exports=r;

@@ -2,6 +2,34 @@
 
 Rashak is a real time flood response and emergency coordination platform built for residents and district administrators. It connects public safety information with operational response tools so people can find help quickly while response teams can coordinate incidents, shelters, evacuations and rescue activity from one system.
 
+## Problem statement
+
+During flood emergencies, residents and district response teams work with fragmented, delayed and often unverified information. Residents struggle to find open shelters, current occupancy, safe evacuation routes and emergency contacts in real time, while relief SOS calls go through informal channels with no location context. District administrators lack a single operational view of incidents, shelter capacity, evacuation progress and rescue unit status, which slows verification, prioritization and dispatch during the exact window when speed matters most.
+
+Rashak addresses this by giving residents a live, location aware view of flood conditions, shelters and evacuation support, and by giving administrators a unified command interface to verify incidents, prioritize response, assign rescue teams and track evacuation and shelter operations in real time, with fallback data so the system keeps working even when public data sources are degraded or unavailable.
+
+## Screenshots
+
+### Resident workspace
+
+| Situation overview | Incident queue | Evacuation |
+| --- | --- | --- |
+| ![Resident situation overview](docs/screenshots/resident-overview.png) | ![Resident incident queue](docs/screenshots/resident-incident-queue.png) | ![Resident evacuation](docs/screenshots/resident-evacuation.png) |
+
+| Shelters | Live response map |
+| --- | --- |
+| ![Resident shelters](docs/screenshots/resident-shelters.png) | ![Resident live response map](docs/screenshots/resident-live-map.png) |
+
+### Administrator (district command) workspace
+
+| Incident queue | Evacuation operations |
+| --- | --- |
+| ![Admin incident queue](docs/screenshots/admin-incident-queue.png) | ![Admin evacuation operations](docs/screenshots/admin-evacuation-operations.png) |
+
+| Rescue operations | Shelter network |
+| --- | --- |
+| ![Admin rescue operations](docs/screenshots/admin-rescue-operations.png) | ![Admin shelter network](docs/screenshots/admin-shelter-network.png) |
+
 ## What Rashak does
 
 Rashak has two focused experiences.
@@ -280,6 +308,9 @@ rashak-platform/
 │   ├── services/
 │   └── utils/
 │
+├── docs/
+│   └── screenshots/
+│
 └── README.md
 ```
 
@@ -342,6 +373,14 @@ Recommended demonstration flow:
 8. Update shelter resources or occupancy
 9. Track the rescue operation
 10. Close the operation and verify the updated state
+
+## Team members
+
+| Name | Role |
+| --- | --- |
+| Ayush | Full stack development |
+| _Add name_ | _Add role_ |
+| _Add name_ | _Add role_ |
 
 ## Important limitations
 

@@ -3,18 +3,22 @@ import axios from 'axios';
 export const API = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 export const BASE = API.replace(/\/api\/?$/, '');
 
-function readCookie(name) {
-  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-  return match ? decodeURIComponent(match[2]) : null;
+let csrfToken = null;
+
+async function getCsrfToken() {
+  if (csrfToken) return csrfToken;
+  const res = await axios.get(`${API}/auth/csrf`, { withCredentials: true });
+  csrfToken = res.data?.csrfToken || null;
+  return csrfToken;
 }
 
-// The role the server treats a request as comes only from the httpOnly session
-// cookie set by POST /auth/role or the Bearer token from a real login — never
-// from anything this client sends, so there is nothing here to spoof. The CSRF
-// token is echoed back from a readable cookie the server itself issued.
-export function api(path, opt = {}) {
+export async function api(path, opt = {}) {
+  const method = String(opt.method || 'get').toUpperCase();
+  let csrf = null;
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    csrf = await getCsrfToken();
+  }
   const token = localStorage.getItem('token');
-  const csrf = readCookie('rashak_csrf');
   return axios({
     url: API + path,
     withCredentials: true,

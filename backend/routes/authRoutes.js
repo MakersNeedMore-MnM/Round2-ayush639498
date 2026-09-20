@@ -12,6 +12,7 @@ r.post('/login', authLimiter, c.login);
 r.post('/register', authLimiter, c.register);
 r.post('/role', authLimiter, c.selectRole);
 r.post('/logout', c.logout);
+r.get('/csrf', c.csrf);
 r.get('/me', protect, c.me);
 
 module.exports = r;

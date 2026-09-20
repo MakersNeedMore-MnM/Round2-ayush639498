@@ -47,7 +47,7 @@ function issueCsrfToken(req, res) {
     token = crypto.randomBytes(24).toString('hex');
     res.cookie(CSRF_COOKIE, token, {
       httpOnly: false,
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 12 * 60 * 60 * 1000
     });
